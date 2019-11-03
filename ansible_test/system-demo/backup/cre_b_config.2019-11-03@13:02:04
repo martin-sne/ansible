@@ -1,0 +1,1216 @@
+! Command: show running-config
+! device: hh-flug-creb-dca-1 (DCS-7280QR-C36, EOS-4.21.3FX-Redist-DHCP)
+!
+! boot system flash:/EOS-4.21.3FX-Redist-DHCP.swi
+!
+alias shbgp show run | begin ^router bgp
+alias shbgpm show bgp ipv4 multicast summary
+alias shpim show ip pim neighbor
+alias shsum show ip bgp summary
+alias shsum6 show ipv6 bgp summary
+alias si show run | section router isis
+!
+no errdisable detect cause link-flap
+no errdisable detect cause xcvr-overheat
+!
+no ip igmp snooping
+!
+transceiver qsfp default-mode 4x10G
+!
+service routing protocols model multi-agent
+!
+logging buffered 846000
+logging monitor debugging
+!
+hostname hh-flug-creb-dca-1
+dns domain technik.kabel-deutschland.de
+!
+ntp server vrf MGMT 10.11.232.65 source Management1
+ntp server vrf MGMT 10.14.232.65 source Management1
+ntp server vrf MGMT 10.15.232.65 source Management1
+!
+snmp-server chassis-id hh-flug-creb-dca-1
+snmp-server contact "nmc@kabeldeutschland.de Tel.: +49 30 33844 115"
+snmp-server location "Hamburg, Flughafenstr. 54"
+snmp-server view sys-view system included
+snmp-server community vitalumos ro MGMT-TRAFFIC-v4
+snmp-server host 10.16.8.32 version 2c vitalumos
+snmp-server host 10.16.8.61 version 2c vitalumos
+snmp-server enable traps
+snmp-server enable traps bgp
+snmp-server enable traps capacity
+no snmp-server enable traps entity ent-config-change
+no snmp-server enable traps entity ent-state-oper-disabled
+no snmp-server enable traps entity ent-state-oper-enabled
+snmp-server enable traps isis
+snmp-server enable traps pim
+snmp-server enable traps snmp
+no snmp-server enable traps snmp authentication
+no snmp-server enable traps snmpConfigManEvent
+snmp-server enable traps switchover
+snmp-server enable traps test
+!
+spanning-tree mode rapid-pvst
+no spanning-tree vlan 4094
+!
+service unsupported-transceiver HarmonicLabOnly 488df68b
+!
+tacacs-server host 10.16.8.2 vrf MGMT key 7 1040001A00451A0A1A01
+tacacs-server host 10.16.8.3 vrf MGMT key 7 12170C14175904053C2E
+!
+aaa group server tacacs+ live
+   server 10.16.8.2 vrf MGMT
+   server 10.16.8.3 vrf MGMT
+!
+aaa authentication login default group live local
+aaa authentication enable default group live local
+aaa authentication policy on-success log
+aaa authentication policy on-failure log
+aaa authorization exec default group live local
+aaa authorization commands 15 default local group live
+!
+no aaa root
+!
+username locadm privilege 15 role network-admin secret sha512 $6$XGC/COhhsUKQ8USq$rvUWAi5iC5Ni/qLVMKt0Twr54CoiXkHg6eSnxjQei7uOvXKK9flDeCdIDxbX20puBJLbRYthaSnaT1I4J7he5/
+!
+clock timezone Europe/Berlin
+!
+vlan 2000
+   name COS-NSI-PROV-VLAN
+!
+vlan 2001
+   name PSX-TV-VLAN
+!
+vlan 2010
+   name COS1-CONTROL-VLAN
+!
+vlan 2011
+   name COS1-DSI-OUT
+!
+vlan 2012
+   name COS1-CM_MTA_CPE-VLAN
+!
+vlan 2020
+   name COS2-CONTROL-VLAN
+!
+vlan 2021
+   name COS2-DSI-OUT
+!
+vlan 2022
+   name COS2-CM_MTA_CPE-VLAN
+!
+vlan 2030
+   name COS3-CONTROL-VLAN
+!
+vlan 2031
+   name COS3-DSI-OUT
+!
+vlan 2032
+   name COS3-CM_MTA_CPE-VLAN
+!
+vlan 2040
+   name COS4-CONTROL-VLAN
+!
+vlan 2041
+   name COS4-DSI-OUT
+!
+vlan 2042
+   name COS4-CM_MTA_CPE-VLAN
+!
+vlan 4093
+   name CRE-INTERCONNECT
+!
+vlan 4094
+   name CRE-MLAG
+   trunk group mlagpeer
+!
+vrf definition COS2-CONTROL-2020
+   rd 200:10
+!
+vrf definition COS3-CONTROL-2030
+   rd 300:10
+!
+vrf definition COS4-CONTROL-2040
+   rd 400:10
+!
+vrf definition MGMT
+   rd 100:10
+!
+interface Port-Channel11
+   description et-0/0/25 hh-flug-cmts-cre-1-dca-1
+   load-interval 30
+   switchport trunk native vlan 2010
+   switchport trunk allowed vlan 2000,2010-2012
+   switchport mode trunk
+   mlag 11
+   qos trust dscp
+!
+interface Port-Channel12
+   description et-0/0/26 hh-flug-cmtsf-cre-1-dca-1
+   load-interval 30
+   switchport trunk native vlan 2010
+   switchport trunk allowed vlan 2000,2010-2012
+   switchport mode trunk
+   mlag 12
+   qos trust dscp
+!
+interface Port-Channel21
+   description et-0/0/27 hh-flug-cmts-cre-1-dca-2
+   load-interval 30
+   switchport trunk native vlan 2020
+   switchport trunk allowed vlan 2000,2020-2022
+   switchport mode trunk
+   mlag 21
+   qos trust dscp
+!
+interface Port-Channel22
+   description et-0/0/28 hh-flug-cmtsf-cre-1-dca-2
+   load-interval 30
+   switchport trunk native vlan 2020
+   switchport trunk allowed vlan 2000,2020-2022
+   switchport mode trunk
+   mlag 22
+   qos trust dscp
+!
+interface Port-Channel31
+   description et-0/0/29 hh-flug-cmts-cre-1-dca-3
+   load-interval 30
+   switchport trunk native vlan 2030
+   switchport trunk allowed vlan 2000,2030-2032
+   switchport mode trunk
+   mlag 31
+   qos trust dscp
+!
+interface Port-Channel32
+   description et-0/0/30 hh-flug-cmtsf-cre-1-dca-3
+   load-interval 30
+   switchport trunk native vlan 2030
+   switchport trunk allowed vlan 2000,2030-2032
+   switchport mode trunk
+   mlag 32
+   qos trust dscp
+!
+interface Port-Channel41
+   description et-0/0/31 hh-flug-cmts-cre-1-dca-4
+   load-interval 30
+   switchport trunk native vlan 2040
+   switchport trunk allowed vlan 2000,2040-2042
+   switchport mode trunk
+   mlag 41
+   qos trust dscp
+!
+interface Port-Channel42
+   description et-0/0/32 hh-flug-cmtsf-cre-1-dca-4
+   load-interval 30
+   switchport trunk native vlan 2040
+   switchport trunk allowed vlan 2000,2040-2042
+   switchport mode trunk
+   mlag 42
+   qos trust dscp
+!
+interface Port-Channel2000
+   description CRE MLAG-PEER INTERFACE
+   load-interval 30
+   switchport trunk allowed vlan 2000-2042,4093-4094
+   switchport mode trunk
+   switchport trunk group mlagpeer
+   ip access-group block_dhcp_req_ipv4 in
+   ipv6 access-group block_dhcp_req_ipv6 in
+   mac access-group filterARP in
+   qos trust dscp
+!
+interface Ethernet1/1
+   description CRE MLAG-PEER1 hh-flug-crea-dca-1 Et1/1 | Po2000
+   load-interval 30
+   speed forced 40gfull
+   channel-group 2000 mode active
+   qos trust dscp
+!
+interface Ethernet2/1
+   description CRE MLAG-PEER2 hh-flug-crea-dca-1 Et2/1 | Po2000
+   load-interval 30
+   speed forced 40gfull
+   channel-group 2000 mode active
+   qos trust dscp
+!
+interface Ethernet3/1
+   shutdown
+   load-interval 30
+   speed forced 10000full
+   qos trust dscp
+!
+interface Ethernet3/2
+   shutdown
+   load-interval 30
+   speed forced 10000full
+   qos trust dscp
+!
+interface Ethernet3/3
+   shutdown
+   load-interval 30
+   speed forced 10000full
+   qos trust dscp
+!
+interface Ethernet3/4
+   shutdown
+   load-interval 30
+   speed forced 10000full
+   qos trust dscp
+!
+interface Ethernet4/1
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet4/2
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet4/3
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet4/4
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet5/1
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet5/2
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet5/3
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet5/4
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet6/1
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet6/2
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet6/3
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet6/4
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet7/1
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet7/2
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet7/3
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet7/4
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet8/1
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet8/2
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet8/3
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet8/4
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet9/1
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet9/2
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet9/3
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet9/4
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet10/1
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet10/2
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet10/3
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet10/4
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet11/1
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet11/2
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet11/3
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet11/4
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet12/1
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet12/2
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet12/3
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet12/4
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet13/1
+   description Local Loop Mgmt CableOS VRF Leak
+   load-interval 30
+   mtu 2200
+   speed forced 10000full
+   no switchport
+   qos trust dscp
+!
+interface Ethernet13/1.2020
+   encapsulation dot1q vlan 2020
+   vrf forwarding COS2-CONTROL-2020
+   ip address 10.89.6.29/30
+!
+interface Ethernet13/1.2030
+   encapsulation dot1q vlan 2030
+   vrf forwarding COS3-CONTROL-2030
+   ip address 10.89.6.37/30
+!
+interface Ethernet13/1.2040
+   encapsulation dot1q vlan 2040
+   vrf forwarding COS4-CONTROL-2040
+   ip address 10.89.6.45/30
+!
+interface Ethernet13/2
+   description Local Loop Mgmt CableOS VRF Leak
+   load-interval 30
+   mtu 2200
+   speed forced 10000full
+   no switchport
+   qos trust dscp
+!
+interface Ethernet13/2.2020
+   encapsulation dot1q vlan 2020
+   ip address 10.89.6.30/30
+!
+interface Ethernet13/2.2030
+   encapsulation dot1q vlan 2030
+   ip address 10.89.6.38/30
+!
+interface Ethernet13/2.2040
+   encapsulation dot1q vlan 2040
+   ip address 10.89.6.46/30
+!
+interface Ethernet13/3
+   description TIMING hh-flug-ts-dca-2
+   load-interval 30
+   speed forced 10000full
+   no switchport
+   qos trust dscp
+!
+interface Ethernet13/3.102
+   description TIMING hh-flug-ts-dca-2
+   encapsulation dot1q vlan 102
+   ip address 10.89.12.14/29
+!
+interface Ethernet13/4
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet14/1
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet14/2
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet14/3
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet14/4
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet15/1
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet15/2
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet15/3
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet15/4
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet16/1
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet16/2
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet16/3
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet16/4
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet17/1
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet17/2
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet17/3
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet17/4
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet18/1
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet18/2
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet18/3
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet18/4
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet19/1
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet19/2
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet19/3
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet19/4
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet20/1
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet20/2
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet20/3
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet20/4
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet21/1
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet21/2
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet21/3
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet21/4
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet22/1
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet22/2
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet22/3
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet22/4
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet23/1
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet23/2
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet23/3
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet23/4
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet24/1
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet24/2
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet24/3
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet24/4
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet25/1
+   description et-0/0/25 hh-flug-cmts-cre-1-dca-1
+   load-interval 30
+   mtu 2200
+   speed forced 100gfull
+   channel-group 11 mode on
+   qos trust dscp
+!
+interface Ethernet26/1
+   description et-0/0/26 hh-flug-cmtsf-cre-1-dca-1
+   load-interval 30
+   mtu 2200
+   speed forced 100gfull
+   channel-group 12 mode on
+   qos trust dscp
+!
+interface Ethernet27/1
+   description et-0/0/27 hh-flug-cmts-cre-1-dca-2
+   load-interval 30
+   mtu 2200
+   speed forced 100gfull
+   channel-group 21 mode on
+   qos trust dscp
+!
+interface Ethernet28/1
+   description et-0/0/28 hh-flug-cmtsf-cre-1-dca-2
+   load-interval 30
+   mtu 2200
+   speed forced 100gfull
+   channel-group 22 mode on
+   qos trust dscp
+!
+interface Ethernet29/1
+   description et-0/0/29 hh-flug-cmts-cre-1-dca-3
+   load-interval 30
+   mtu 2200
+   speed forced 100gfull
+   channel-group 31 mode on
+   qos trust dscp
+!
+interface Ethernet30/1
+   description et-0/0/30 hh-flug-cmtsf-cre-1-dca-3
+   load-interval 30
+   mtu 2200
+   speed forced 100gfull
+   channel-group 32 mode on
+   qos trust dscp
+!
+interface Ethernet31/1
+   description et-0/0/31 hh-flug-cmts-cre-1-dca-4
+   load-interval 30
+   mtu 2200
+   speed forced 100gfull
+   channel-group 41 mode on
+   qos trust dscp
+!
+interface Ethernet32/1
+   description et-0/0/32 hh-flug-cmtsf-cre-1-dca-4
+   load-interval 30
+   mtu 2200
+   speed forced 100gfull
+   channel-group 42 mode on
+   qos trust dscp
+!
+interface Ethernet33/1
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet34/1
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Ethernet35/1
+   description hh-luis-rt-bpop-2 Hu0/4/0/0 | %ETHERNET_TRAIL%
+   shutdown
+   load-interval 30
+   mtu 2200
+   speed forced 100gfull
+   no switchport
+   ip address 83.169.157.214/31
+   ipv6 enable
+   ipv6 address 2a02:8100:6:2::100:1d06/126
+   ipv6 nd ra disabled
+   isis enable KDG
+   isis bfd
+   isis ipv6 bfd
+   isis circuit-type level-2
+   isis metric 5000
+   isis ipv6 metric 5000
+   isis network point-to-point
+   isis authentication mode md5
+   isis authentication key 7 Rwvig/AoG1vbFmHM62gDog==
+   mpls ldp igp sync
+   ip pim sparse-mode
+   qos trust dscp
+!
+interface Ethernet36/1
+   shutdown
+   load-interval 30
+   qos trust dscp
+!
+interface Loopback0
+   ip address 88.134.168.27/32
+   ipv6 enable
+   ipv6 address 2a02:8100:4::912/128
+   isis enable KDG
+   isis passive
+!
+interface Loopback1
+   ip address 10.89.2.27/32
+   ipv6 address 2a02:8100:4:1::912/128
+   isis enable KDG
+   isis passive
+!
+interface Management1
+   description OoB Mgmt
+   vrf forwarding MGMT
+   ip address 10.89.105.11/24
+!
+interface Vlan2000
+   description COS-NSI-PROV-VLAN
+   mtu 9000
+   ip address 10.89.13.29/27
+   ipv6 address 2a02:8100:101:40::3/64
+   ipv6 nd ra disabled
+   no mpls ldp igp sync
+   no mpls ip
+   ip virtual-router address 10.89.13.30
+   ipv6 virtual-router address 2a02:8100:101:40::1
+!
+interface Vlan2010
+   description COS1-CONTROL-VLAN
+   ip address 169.254.0.102/16
+   mpls ldp igp sync
+   no mpls ip
+   ip virtual-router address 169.254.0.1
+!
+interface Vlan2011
+   description COS1-DSI-OUT
+   mtu 2200
+   ip address 10.89.14.13/28
+   no mpls ldp igp sync
+   no mpls ip
+   ip virtual-router address 10.89.14.14
+!
+interface Vlan2012
+   description COS1-CM_MTA_CPE-VLAN
+   mtu 2200
+   ip local-proxy-arp
+   arp timeout 5400
+   no ip dhcp smart-relay
+   ipv6 dhcp relay install routes
+   ipv6 enable
+   ipv6 address fe80::2/64 link-local
+   ipv6 nd ra interval msec 5000
+   ipv6 nd ra lifetime 120
+   ipv6 nd ra mtu suppress
+   ipv6 nd managed-config-flag
+   ipv6 nd other-config-flag
+   ipv6 nd router-preference high
+   no mpls ip
+!
+interface Vlan2020
+   description COS2-CONTROL-VLAN
+   vrf forwarding COS2-CONTROL-2020
+   ip address 169.254.0.102/16
+   mpls ldp igp sync
+   no mpls ip
+   ip virtual-router address 169.254.0.1
+!
+interface Vlan2021
+   description COS2-DSI-OUT
+   mtu 2200
+   ip address 10.89.14.29/28
+   no mpls ldp igp sync
+   no mpls ip
+   ip virtual-router address 10.89.14.30
+!
+interface Vlan2022
+   description COS2-CM_MTA_CPE-VLAN
+   mtu 2200
+   ip local-proxy-arp
+   arp timeout 5400
+   no ip dhcp smart-relay
+   ipv6 dhcp relay install routes
+   ipv6 enable
+   ipv6 address fe80::2/64 link-local
+   ipv6 nd ra interval msec 5000
+   ipv6 nd ra lifetime 120
+   ipv6 nd ra mtu suppress
+   ipv6 nd managed-config-flag
+   ipv6 nd other-config-flag
+   ipv6 nd router-preference high
+   no mpls ip
+!
+interface Vlan2030
+   description COS3-CONTROL-VLAN
+   vrf forwarding COS3-CONTROL-2030
+   ip address 169.254.0.102/16
+   mpls ldp igp sync
+   no mpls ip
+   ip virtual-router address 169.254.0.1
+!
+interface Vlan2031
+   description COS3-DSI-OUT
+   mtu 2200
+   ip address 10.89.14.45/28
+   no mpls ldp igp sync
+   no mpls ip
+   ip virtual-router address 10.89.14.46
+!
+interface Vlan2032
+   description COS3-CM_MTA_CPE-VLAN
+   mtu 2200
+   ip local-proxy-arp
+   arp timeout 5400
+   no ip dhcp smart-relay
+   ipv6 dhcp relay install routes
+   ipv6 enable
+   ipv6 address fe80::2/64 link-local
+   ipv6 nd ra interval msec 5000
+   ipv6 nd ra lifetime 120
+   ipv6 nd ra mtu suppress
+   ipv6 nd managed-config-flag
+   ipv6 nd other-config-flag
+   ipv6 nd router-preference high
+   no mpls ip
+!
+interface Vlan2040
+   description COS4-CONTROL-VLAN
+   vrf forwarding COS4-CONTROL-2040
+   ip address 169.254.0.102/16
+   mpls ldp igp sync
+   no mpls ip
+   ip virtual-router address 169.254.0.1
+!
+interface Vlan2041
+   description COS4-DSI-OUT
+   mtu 2200
+   ip address 10.89.14.61/28
+   no mpls ldp igp sync
+   no mpls ip
+   ip virtual-router address 10.89.14.62
+!
+interface Vlan2042
+   description COS4-CM_MTA_CPE-VLAN
+   mtu 2200
+   ip local-proxy-arp
+   arp timeout 5400
+   no ip dhcp smart-relay
+   ipv6 dhcp relay install routes
+   ipv6 enable
+   ipv6 address fe80::2/64 link-local
+   ipv6 nd ra interval msec 5000
+   ipv6 nd ra lifetime 120
+   ipv6 nd ra mtu suppress
+   ipv6 nd managed-config-flag
+   ipv6 nd other-config-flag
+   ipv6 nd router-preference high
+   no mpls ip
+!
+interface Vlan4093
+   description CRE-INTERCONNECT
+   mtu 2200
+   ip address 83.169.157.213/31
+   ipv6 enable
+   ipv6 address 2a02:8100:6:2::100:1d16/126
+   isis enable KDG
+   no isis bfd
+   no isis ipv6 bfd
+   isis circuit-type level-2
+   isis metric 5000
+   isis ipv6 metric 5000
+   isis network point-to-point
+   isis authentication mode md5
+   isis authentication key 7 Ve6w5r+pDCqn/mIv/A9AuA==
+   mpls ldp igp sync
+   ip pim sparse-mode
+!
+interface Vlan4094
+   description CRE-MLAG-PEER
+   ip address 10.89.12.129/31
+   no mpls ip
+!
+ip virtual-router mac-address 10:12:00:00:65:98
+ip virtual-router mac-address advertisement-interval 5
+!
+ipv6 access-list standard MGMT-TRAFFIC-v6
+   statistics per-entry
+   10 remark MGMT ACCESS CRE IPv6
+   20 permit 2a02:8100::/32
+   30 permit fe80::/10
+   40 deny any
+!
+ip access-list block_dhcp_req_ipv4
+   statistics per-entry
+   10 deny udp any eq bootpc any eq bootps
+   20 permit ip any any
+!
+ip access-list standard BGP-TRAFFIC-v4
+   statistics per-entry
+   10 remark ALLOW ONLY BB Loopback
+   20 permit 83.169.183.0/25
+   30 deny any
+!
+ip access-list standard HTTP-API-v4
+   statistics per-entry
+   10 remark eAPI ACCESS CRE IPv4
+   20 permit 10.10.2.0/24
+   30 permit 10.16.8.0/22
+   40 permit 10.16.122.0/23
+   50 deny any
+!
+ip access-list standard LDP-TRAFFIC-v4
+   statistics per-entry
+   10 remark ALLOW ONLY DCA LINK NETWORKS
+   20 permit 83.169.157.210/31
+   30 permit 83.169.157.212/31
+   40 permit 83.169.157.214/31
+   100 remark ALLOW LDP ENABLED CRE/iCMTS
+   110 permit 88.134.168.0/23
+   120 deny any
+!
+ip access-list standard MGMT-TRAFFIC-v4
+   statistics per-entry
+   10 remark MGMT ACCESS CRE IPv4
+   20 permit 10.10.2.0/24
+   30 permit 10.16.8.0/22
+   40 deny any
+!
+ip route 10.89.0.12/32 169.254.0.2 tag 100 name COS1_CLUSTER_MGMT
+ip route 10.89.0.13/32 10.89.6.25 tag 100 name COS2_CLUSTER_MGMT_VRF_LEAK
+ip route 10.89.0.14/32 10.89.6.33 tag 100 name COS3_CLUSTER_MGMT_VRF_LEAK
+ip route 10.89.0.15/32 10.89.6.41 tag 100 name COS4_CLUSTER_MGMT_VRF_LEAK
+ip route 10.89.12.0/29 83.169.157.212 name PTP_SERVER_CONNECTED_TO_CRE_A
+ip route vrf COS2-CONTROL-2020 10.89.0.13/32 169.254.0.2 name COS2_MGMT_VRF
+ip route vrf COS3-CONTROL-2030 10.89.0.14/32 169.254.0.2 name COS3_MGMT_VRF
+ip route vrf COS4-CONTROL-2040 10.89.0.15/32 169.254.0.2 name COS4_MGMT_VRF
+ip route vrf MGMT 10.0.0.0/8 Management1 10.89.105.254
+!
+arp 10.89.12.128 98:5d:82:be:6b:e9 arpa
+arp 83.169.157.212 98:5d:82:be:6b:e9 arpa
+!
+ip routing
+ip routing vrf COS2-CONTROL-2020
+ip routing vrf COS3-CONTROL-2030
+ip routing vrf COS4-CONTROL-2040
+no ip routing vrf MGMT
+!
+ip multicast-routing
+!
+ip prefix-list DENY_IPV4_NETWORKS
+   seq 10 permit 0.0.0.0/0 ge 31
+   seq 20 permit 169.254.0.0/16 le 32
+   seq 30 permit 10.89.4.0/24 le 32
+!
+ipv6 prefix-list DENY_IPV6_NETWORKS
+   seq 10 permit ::/0 ge 124
+!
+ipv6 prefix-list NA_PD_SCOPES
+   seq 5 permit 2a02:8108::/29 ge 56 le 64
+   seq 10 permit 2a02:8106::/38 ge 56 le 64
+!
+ipv6 unicast-routing
+!
+mac access-list filterARP
+   statistics per-entry
+   10 remark MAC ACL to prevent ARP on CRE cluster crosslink
+   20 remark static ARP entries required to resolve physical IPs
+   30 deny 98:5d:82:be:6b:e9 00:00:00:00:00:00 98:5d:82:be:57:61 00:00:00:00:00:00 arp
+   40 permit any any
+!
+mlag configuration
+   domain-id mlag1
+   local-interface Vlan4094
+   peer-address 10.89.12.128
+   peer-link Port-Channel2000
+!
+mpls ip
+!
+mpls ldp
+   router-id 88.134.168.27
+   transport-address interface Loopback0
+   password 7 011E160848590D0B26
+   no shutdown
+!
+qos map dscp 10 to traffic-class 3
+qos map dscp 18 to traffic-class 4
+!
+route-map CONNECTED_TO_BGP31334_IPV4_IPV6_VRF_DEFAULT deny 10
+   description DO NOT REDISTRIBUTE LOOPBACKS INTO BGP
+   match ip address prefix-list DENY_IPV4_NETWORKS
+!
+route-map CONNECTED_TO_BGP31334_IPV4_IPV6_VRF_DEFAULT deny 20
+   description DO NOT REDISTRIBUTE LOOPBACKS INTO BGP IPV6
+   match ipv6 address prefix-list DENY_IPV6_NETWORKS
+!
+route-map CONNECTED_TO_BGP31334_IPV4_IPV6_VRF_DEFAULT permit 30
+   description REDISTRIBUTE CONNECTED INTO BGP IPV4 IPV6
+   set community 31334:2212 additive
+!
+route-map NA_PD_TO_BGP31334_IPV6_VRF_DEFAULT permit 40
+   description REDISTRIBUTE NA_PD IPv6 INTO BGP
+   match ipv6 address prefix-list NA_PD_SCOPES
+!
+route-map STATIC_TO_BGP31334_IPV4_IPV6_VRF_DEFAULT permit 10
+   description REDISTRIBUTE IPV4 PREFIXES INTO BGP
+   match tag 100
+   set community 31334:10000
+!
+route-map STATIC_TO_BGP31334_IPV4_IPV6_VRF_DEFAULT permit 20
+   description REDISTRIBUTE IPV6 PREFIXES INTO BGP
+   match tag 150
+!
+router bgp 31334
+   router-id 88.134.168.27
+   graceful-restart restart-time 300
+   graceful-restart
+   ip access-group BGP-TRAFFIC-v4
+   neighbor IPV4-UC_MC-BPOP-31334 peer-group
+   neighbor IPV4-UC_MC-BPOP-31334 description BPOP IPv4 UNICAST/MULTICAST
+   neighbor IPV4-UC_MC-BPOP-31334 password 7 Lf1XE4lZcOAxQhP8cp2zMA==
+   neighbor IPV4-UC_MC-BPOP-31334 maximum-routes 12000 
+   neighbor IPV6-UNICAST-BPOP-31334 peer-group
+   neighbor IPV6-UNICAST-BPOP-31334 description BPOP IPv6 UNICAST
+   neighbor IPV6-UNICAST-BPOP-31334 password 7 mj2j0FWQ3jwfzSeJOsui8Q==
+   neighbor IPV6-UNICAST-BPOP-31334 maximum-routes 12000 
+   neighbor 83.169.183.9 peer-group IPV4-UC_MC-BPOP-31334
+   neighbor 83.169.183.9 remote-as 31334
+   neighbor 83.169.183.9 description HH-LUIS-RT-BPOP-2
+   neighbor 83.169.183.14 peer-group IPV4-UC_MC-BPOP-31334
+   neighbor 83.169.183.14 remote-as 31334
+   neighbor 83.169.183.14 description HH-FLUG-RT-BPOP-2
+   neighbor 2a02:8100:4::67 peer-group IPV6-UNICAST-BPOP-31334
+   neighbor 2a02:8100:4::67 remote-as 31334
+   neighbor 2a02:8100:4::67 description HH-LUIS-RT-BPOP-2
+   neighbor 2a02:8100:4::117 peer-group IPV6-UNICAST-BPOP-31334
+   neighbor 2a02:8100:4::117 remote-as 31334
+   neighbor 2a02:8100:4::117 description HH-FLUG-RT-BPOP-2
+   redistribute connected route-map CONNECTED_TO_BGP31334_IPV4_IPV6_VRF_DEFAULT
+   redistribute static route-map STATIC_TO_BGP31334_IPV4_IPV6_VRF_DEFAULT
+   !
+   address-family ipv4
+      neighbor IPV4-UC_MC-BPOP-31334 activate
+   !
+   address-family ipv4 multicast
+      neighbor IPV4-UC_MC-BPOP-31334 activate
+   !
+   address-family ipv6
+      neighbor IPV6-UNICAST-BPOP-31334 activate
+      redistribute dhcp route-map NA_PD_TO_BGP31334_IPV6_VRF_DEFAULT
+!
+router isis KDG
+   no hello padding
+   net 49.0011.0881.3416.8027.00
+   is-type level-2
+   log-adjacency-changes
+   max-lsp-lifetime 65535
+   spf-interval 5 50 200
+   timers lsp out-delay 65000
+   timers lsp generation 5 20 200
+   authentication mode md5
+   authentication key 7 Ve6w5r+pDCqn/mIv/A9AuA==
+   !
+   address-family ipv4 unicast
+      bfd all-interfaces
+   !
+   address-family ipv6 unicast
+      bfd all-interfaces
+      multi-topology
+!
+ip tacacs vrf MGMT source-interface Management1
+!
+banner login
+           Kabel Deutschland GmbH
+    No unauthorized access to KDG systems !
+
+        Please report any problems to
+        nmc-berlin@kabeldeutschland.de
+           phone +49 30 33844115
+EOF
+!
+management api http-commands
+   log-level debug
+   no shutdown
+   !
+   vrf default
+      ip access-group HTTP-API-v4
+      ipv6 access-group MGMT-TRAFFIC-v6
+!
+management ssh
+   ip access-group MGMT-TRAFFIC-v4 in
+   ipv6 access-group MGMT-TRAFFIC-v6 in
+!
+end

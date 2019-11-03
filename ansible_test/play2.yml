@@ -1,0 +1,13 @@
+- name: "Demonstrate connecting to switches"
+  hosts: cre
+  gather_facts: no
+
+        tasks:
+         ###
+         # Collect data
+         #
+         - name: Gather facts (eos)
+           eos_facts:
+           when: ansible_network_os == 'eos'
+
+           

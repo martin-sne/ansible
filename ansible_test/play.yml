@@ -1,0 +1,7 @@
+---
+- name: configure arista switches
+  hosts: cre
+  connection: network_cli
+  gather_facts: no
+  roles:
+    - system-demo
